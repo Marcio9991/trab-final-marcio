@@ -1,0 +1,1 @@
+Padrões que tem que ter nas 

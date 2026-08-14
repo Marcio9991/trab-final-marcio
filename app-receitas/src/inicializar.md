@@ -1,0 +1,1 @@
+Usar o comando no terminal, o de iniciar um app, para poder começar o projeto, e não commitar o node-modules sempre que eu fizer o comando 
