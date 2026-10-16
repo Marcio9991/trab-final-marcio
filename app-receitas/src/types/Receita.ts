@@ -28,3 +28,12 @@ export interface Receita {
   comentarios: Comentario[];
   criadoEm: string;
 }
+
+export type NovaReceita = Pick<
+  Receita,
+  "titulo" | "metodoId" | "autorId" | "ingredientes" | "modoPreparo"
+>;
+
+export type EdicaoReceita = Partial<
+  Pick<Receita, "titulo" | "metodoId" | "ingredientes" | "modoPreparo">
+>;
