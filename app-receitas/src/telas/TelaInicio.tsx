@@ -1,16 +1,23 @@
-import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { Metodo } from "../types/Receita";
-
-const metodos: Metodo[] = [
-  { id: "filtragem", nome: "Filtragem", descricao: "Água quente passa pelo pó de café e por um filtro" },
-  { id: "infusao", nome: "Infusão", descricao: "O pó fica submerso na água por alguns minutos" },
-  { id: "pressao", nome: "Pressão", descricao: "A água é forçada a passar pelo café rapidamente" },
-  { id: "decoccao", nome: "Decocção", descricao: "O pó ferve junto com a água" },
-];
+import { cores } from "../utils/tema";
+import { metodos } from "../utils/metodos";
+import { mostrarAlerta } from "../utils/alerta";
+import { mensagemDeErro } from "../utils/mensagemErro";
+import SairUsuario from "../services/SairUsuario";
+import Cartao from "../componentes/Cartao";
+import Botao from "../componentes/Botao";
 
 export default function TelaInicio() {
   const router = useRouter();
+
+  const sair = async () => {
+    try {
+      await SairUsuario.executar();
+    } catch (erro) {
+      mostrarAlerta("Erro ao sair", mensagemDeErro(erro));
+    }
+  };
 
   return (
     <View style={estilos.container}>
@@ -19,15 +26,15 @@ export default function TelaInicio() {
         data={metodos}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Pressable
-            style={estilos.item}
+          <Cartao
+            titulo={item.nome}
+            descricao={item.descricao}
             onPress={() => router.push(`/topicos-receita/${item.id}`)}
-          >
-            <Text style={estilos.itemTitulo}>{item.nome}</Text>
-            <Text style={estilos.itemDescricao}>{item.descricao}</Text>
-          </Pressable>
+          />
         )}
       />
+      <Botao texto="Nova receita" onPress={() => router.push("/nova-receita")} />
+      <Botao texto="Sair" onPress={sair} />
     </View>
   );
 }
@@ -36,25 +43,12 @@ const estilos = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: cores.fundo,
   },
   titulo: {
     fontSize: 22,
     fontWeight: "bold",
+    color: cores.destaque,
     marginBottom: 16,
-  },
-  item: {
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: "#f2e9e4",
-    marginBottom: 12,
-  },
-  itemTitulo: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  itemDescricao: {
-    fontSize: 14,
-    color: "#555",
-    marginTop: 4,
   },
 });

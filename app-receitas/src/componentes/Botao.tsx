@@ -4,14 +4,17 @@ import { cores } from "../utils/tema";
 interface Props {
   texto: string;
   onPress: () => void;
+  desabilitado?: boolean;
 }
 
-export default function Botao({ texto, onPress }: Props) {
+export default function Botao({ texto, onPress, desabilitado }: Props) {
   return (
     <Pressable
+      disabled={desabilitado}
       style={({ pressed }) => [
         estilos.botao,
         { backgroundColor: pressed ? cores.destaque : cores.principal },
+        desabilitado && estilos.desabilitado,
       ]}
       onPress={onPress}
     >
@@ -30,5 +33,8 @@ const estilos = StyleSheet.create({
   texto: {
     color: "#fff",
     fontWeight: "600",
+  },
+  desabilitado: {
+    opacity: 0.6,
   },
 });

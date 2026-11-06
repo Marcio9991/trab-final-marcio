@@ -4,6 +4,11 @@ export interface Metodo {
   descricao: string;
 }
 
+export interface Autor {
+  id: string;
+  nome: string;
+}
+
 export interface Avaliacao {
   id: string;
   usuarioId: string;
@@ -13,6 +18,7 @@ export interface Avaliacao {
 export interface Comentario {
   id: string;
   usuarioId: string;
+  usuarioNome: string;
   texto: string;
   criadoEm: string;
 }
@@ -22,6 +28,7 @@ export interface Receita {
   titulo: string;
   metodoId: string;
   autorId: string;
+  autorNome: string;
   ingredientes: string[];
   modoPreparo: string;
   avaliacoes: Avaliacao[];
@@ -31,7 +38,7 @@ export interface Receita {
 
 export type NovaReceita = Pick<
   Receita,
-  "titulo" | "metodoId" | "autorId" | "ingredientes" | "modoPreparo"
+  "titulo" | "metodoId" | "autorId" | "autorNome" | "ingredientes" | "modoPreparo"
 >;
 
 export type EdicaoReceita = Partial<

@@ -2,13 +2,14 @@ import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { COLECAO_RECEITAS } from "./colecoes";
 import { gerarId } from "./gerarId";
-import { Comentario } from "../types/Receita";
+import { Autor, Comentario } from "../types/Receita";
 
 export default class SalvarComentario {
-  static async executar(receitaId: string, usuarioId: string, texto: string): Promise<void> {
+  static async executar(receitaId: string, autor: Autor, texto: string): Promise<void> {
     const comentario: Comentario = {
       id: gerarId(),
-      usuarioId,
+      usuarioId: autor.id,
+      usuarioNome: autor.nome,
       texto,
       criadoEm: new Date().toISOString(),
     };

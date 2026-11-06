@@ -1,46 +1,74 @@
 import { useState } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { cores } from "../utils/tema";
+import { mostrarAlerta } from "../utils/alerta";
+import { mensagemDeErro } from "../utils/mensagemErro";
+import { paraAutor } from "../utils/autor";
+import { useAutenticacao } from "../contextos/ContextoAutenticacao";
+import { useConsulta } from "../hooks/useConsulta";
+import ConsultarReceitas from "../services/ConsultarReceitas";
+import SalvarComentario from "../services/SalvarComentario";
 import Botao from "../componentes/Botao";
+import CampoTexto from "../componentes/CampoTexto";
+import Carregando from "../componentes/Carregando";
+import Aviso from "../componentes/Aviso";
 
 interface Props {
   id: string;
 }
 
 export default function TelaComentarios({ id }: Props) {
-  const [comentarios, setComentarios] = useState<string[]>([]);
+  const { usuario } = useAutenticacao();
+  const { dados: receita, carregando, erro, recarregar } = useConsulta(
+    () => ConsultarReceitas.porId(id),
+    [id]
+  );
   const [texto, setTexto] = useState("");
+  const [enviando, setEnviando] = useState(false);
 
-  const adicionarComentario = () => {
-    if (texto.trim().length === 0) return;
-    setComentarios([...comentarios, texto]);
-    setTexto("");
+  if (carregando) return <Carregando />;
+
+  const enviar = async () => {
+    if (!usuario) return;
+    const conteudo = texto.trim();
+    if (conteudo.length === 0) return;
+
+    setEnviando(true);
+    try {
+      await SalvarComentario.executar(id, paraAutor(usuario), conteudo);
+      setTexto("");
+      recarregar();
+    } catch (falha) {
+      mostrarAlerta("Erro ao comentar", mensagemDeErro(falha));
+    } finally {
+      setEnviando(false);
+    }
   };
 
   return (
-    <View style={estilos.container}>
+    <KeyboardAvoidingView
+      style={estilos.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Text style={estilos.titulo}>Comentários</Text>
+      {erro && <Aviso texto={erro} />}
 
       <FlatList
-        data={comentarios}
-        keyExtractor={(_, index) => String(index)}
+        style={estilos.lista}
+        data={receita?.comentarios ?? []}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={estilos.comentario}>
-            <Text style={estilos.comentarioTexto}>{item}</Text>
+            <Text style={estilos.comentarioAutor}>{item.usuarioNome}</Text>
+            <Text style={estilos.comentarioTexto}>{item.texto}</Text>
           </View>
         )}
-        ListEmptyComponent={<Text style={estilos.vazio}>Nenhum comentário ainda</Text>}
+        ListEmptyComponent={erro ? undefined : <Aviso texto="Nenhum comentário ainda" />}
       />
 
-      <TextInput
-        style={estilos.campo}
-        placeholder="Escreva um comentário"
-        value={texto}
-        onChangeText={setTexto}
-      />
-
-      <Botao texto="Enviar" onPress={adicionarComentario} />
-    </View>
+      <CampoTexto placeholder="Escreva um comentário" value={texto} onChangeText={setTexto} />
+      <Botao texto="Enviar" onPress={enviar} desabilitado={enviando} />
+    </KeyboardAvoidingView>
   );
 }
 
@@ -56,26 +84,22 @@ const estilos = StyleSheet.create({
     color: cores.destaque,
     marginBottom: 16,
   },
+  lista: {
+    flex: 1,
+  },
   comentario: {
     backgroundColor: cores.principal,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
   },
+  comentarioAutor: {
+    color: cores.fundo,
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
   comentarioTexto: {
     color: "#fff",
-  },
-  vazio: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 16,
-  },
-  campo: {
-    borderWidth: 1,
-    borderColor: cores.principal,
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 16,
-    backgroundColor: "#fff",
   },
 });

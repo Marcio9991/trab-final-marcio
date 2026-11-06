@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
-import TelaReceita from "../../src/telas/TelaReceita";
+import TelaDetalheReceita from "../../src/telas/TelaDetalheReceita";
 
 export default function Receita() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  return <TelaReceita id={id} />;
+  return <TelaDetalheReceita id={id} />;
 }

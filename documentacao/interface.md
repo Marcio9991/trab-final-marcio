@@ -2,17 +2,51 @@
 
 ## Paleta de cores
 
-O app usa três tons de marrom, definidos em `src/utils/tema.ts` e aplicados em todas as telas:
+O aplicativo usa três tons de marrom, definidos em `src/utils/tema.ts` e aplicados em todas as telas:
 
-- **Pastel** (`#F2E9E4`) — fundo das telas
-- **Médio** (`#8D6E63`) — áreas principais: cartões, botões, bordas de campo
-- **Escuro** (`#4E342E`) — estado pressionado dos botões e cartões
+| Tom | Cor | Onde é usado |
+|---|---|---|
+| Pastel (`cores.fundo`) | `#F2E9E4` | Fundo das telas |
+| Médio (`cores.principal`) | `#8D6E63` | Áreas principais: cabeçalho, cartões, botões, bordas de campo, estrelas marcadas |
+| Escuro (`cores.destaque`) | `#4E342E` | Botões e cartões ao serem pressionados; títulos |
 
-## Padrão de telas
+No celular não existe "passar o mouse"; o tom escuro aparece enquanto o botão ou cartão está pressionado (na web, também durante o clique).
 
-Toda tela usa `cores.fundo` no container, `cores.principal` nos elementos de destaque e `cores.destaque` quando o elemento é pressionado. Esse padrão fica centralizado em dois componentes reutilizáveis:
+## Tipografia
 
-- `src/componentes/Botao.tsx` — botão de ação (avaliar, comentar, salvar, enviar)
-- `src/componentes/Cartao.tsx` — item de lista clicável (métodos, receitas)
+Fonte padrão do sistema, com três tamanhos:
 
-Assim, qualquer tela nova só precisa usar esses dois componentes pra manter o mesmo visual, sem repetir estilo.
+- títulos de tela: 22, negrito
+- títulos de seção e nomes de campo: 14 a 16, seminegrito
+- texto corrente: 14
+
+## Componentes compartilhados
+
+- `Botao` — botão de ação; fica mais claro e inativo enquanto uma operação está em andamento
+- `Cartao` — item de lista clicável (métodos e receitas)
+- `CampoTexto` — campo de entrada com rótulo opcional
+- `Carregando` — indicador de carregamento em tela cheia
+- `Aviso` — texto de estado: lista vazia ou erro
+
+Qualquer tela nova deve usar esses componentes para manter o mesmo visual.
+
+## Telas
+
+| Tela | Função |
+|---|---|
+| Entrar | Login com e-mail e senha, com link para o cadastro |
+| Criar conta | Cadastro com nome, e-mail e senha |
+| Métodos de preparo | Lista os quatro métodos; botões "Nova receita" e "Sair" |
+| Receitas de um método | Lista as receitas com autor e média |
+| Receita | Ingredientes, modo de preparo e botões de avaliar, comentar e excluir (para o autor) |
+| Avaliar | Escolha de 1 a 5 estrelas |
+| Comentários | Lista de comentários e campo para escrever |
+| Nova receita | Formulário com escolha do método, título, ingredientes e modo de preparo |
+
+## Diretrizes de UI
+
+- fundo pastel em toda tela, com margem interna de 16
+- toda lista mostra um aviso quando está vazia
+- toda operação com o Firebase mostra carregamento ou desabilita o botão enquanto roda
+- erros aparecem em alerta, com mensagem em português
+- ações irreversíveis, como excluir, pedem confirmação

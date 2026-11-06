@@ -34,6 +34,7 @@ export default class ConsultarReceitas {
   }
 
   private static converter(item: DocumentSnapshot<DocumentData>): Receita {
-    return { ...item.data(), id: item.id } as Receita;
+    const dados = (item.data() ?? {}) as Partial<Receita>;
+    return { avaliacoes: [], comentarios: [], ...dados, id: item.id } as Receita;
   }
 }

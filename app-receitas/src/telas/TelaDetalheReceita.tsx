@@ -1,8 +1,17 @@
-import { View, Text, StyleSheet } from "react-native";
+import { useState } from "react";
+import { ScrollView, Text, View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { receitas } from "../utils/receitasMock";
 import { cores } from "../utils/tema";
+import { descreverAvaliacao } from "../utils/avaliacao";
+import { confirmar, mostrarAlerta } from "../utils/alerta";
+import { mensagemDeErro } from "../utils/mensagemErro";
+import { useAutenticacao } from "../contextos/ContextoAutenticacao";
+import { useConsulta } from "../hooks/useConsulta";
+import ConsultarReceitas from "../services/ConsultarReceitas";
+import ExcluirReceita from "../services/ExcluirReceita";
 import Botao from "../componentes/Botao";
+import Carregando from "../componentes/Carregando";
+import Aviso from "../componentes/Aviso";
 
 interface Props {
   id: string;
@@ -10,23 +19,48 @@ interface Props {
 
 export default function TelaDetalheReceita({ id }: Props) {
   const router = useRouter();
-  const receita = receitas.find((item) => item.id === id);
+  const { usuario } = useAutenticacao();
+  const { dados: receita, carregando, erro } = useConsulta(() => ConsultarReceitas.porId(id), [id]);
+  const [excluindo, setExcluindo] = useState(false);
 
-  if (!receita) {
+  if (carregando) return <Carregando />;
+
+  if (erro || !receita) {
     return (
       <View style={estilos.container}>
-        <Text style={estilos.titulo}>Receita não encontrada</Text>
+        <Aviso texto={erro ?? "Receita não encontrada"} />
       </View>
     );
   }
 
+  const ehAutor = usuario?.uid === receita.autorId;
+
+  const excluir = async () => {
+    const confirmado = await confirmar(
+      "Excluir receita",
+      "Essa ação não pode ser desfeita. Deseja excluir?"
+    );
+    if (!confirmado) return;
+
+    setExcluindo(true);
+    try {
+      await ExcluirReceita.executar(id);
+      router.back();
+    } catch (falha) {
+      mostrarAlerta("Erro ao excluir", mensagemDeErro(falha));
+      setExcluindo(false);
+    }
+  };
+
   return (
-    <View style={estilos.container}>
+    <ScrollView style={estilos.container} contentContainerStyle={estilos.conteudo}>
       <Text style={estilos.titulo}>{receita.titulo}</Text>
+      <Text style={estilos.autor}>por {receita.autorNome}</Text>
+      <Text style={estilos.avaliacao}>{descreverAvaliacao(receita.avaliacoes)}</Text>
 
       <Text style={estilos.secao}>Ingredientes</Text>
-      {receita.ingredientes.map((ingrediente) => (
-        <Text key={ingrediente} style={estilos.texto}>
+      {receita.ingredientes.map((ingrediente, indice) => (
+        <Text key={`${indice}-${ingrediente}`} style={estilos.texto}>
           • {ingrediente}
         </Text>
       ))}
@@ -35,22 +69,38 @@ export default function TelaDetalheReceita({ id }: Props) {
       <Text style={estilos.texto}>{receita.modoPreparo}</Text>
 
       <Botao texto="Avaliar" onPress={() => router.push(`/receita/${id}/avaliar`)} />
-      <Botao texto="Comentários" onPress={() => router.push(`/receita/${id}/comentarios`)} />
-    </View>
+      <Botao
+        texto={`Comentários (${receita.comentarios.length})`}
+        onPress={() => router.push(`/receita/${id}/comentarios`)}
+      />
+      {ehAutor && <Botao texto="Excluir receita" onPress={excluir} desabilitado={excluindo} />}
+    </ScrollView>
   );
 }
 
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: cores.fundo,
+  },
+  conteudo: {
+    padding: 16,
   },
   titulo: {
     fontSize: 22,
     fontWeight: "bold",
     color: cores.destaque,
-    marginBottom: 12,
+  },
+  autor: {
+    fontSize: 14,
+    color: cores.principal,
+    marginTop: 4,
+  },
+  avaliacao: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: cores.destaque,
+    marginTop: 8,
   },
   secao: {
     fontSize: 16,
