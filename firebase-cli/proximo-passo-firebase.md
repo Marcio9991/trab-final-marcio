@@ -1,1 +1,0 @@
-# Fazer o CRUD do projeto, depois de definir o que será criado.

@@ -29,3 +29,4 @@ function criarAuth() {
 }
 
 export const auth = criarAuth();
+auth.languageCode = "pt-BR";

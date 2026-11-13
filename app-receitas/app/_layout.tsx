@@ -29,6 +29,7 @@ function Navegacao() {
         <Stack.Screen name="receita/[id]" options={{ title: "Receita" }} />
         <Stack.Screen name="receita/[id]/avaliar" options={{ title: "Avaliar" }} />
         <Stack.Screen name="receita/[id]/comentarios" options={{ title: "Comentários" }} />
+        <Stack.Screen name="receita/[id]/editar" options={{ title: "Editar receita" }} />
         <Stack.Screen name="nova-receita" options={{ title: "Nova receita" }} />
       </Stack.Protected>
 
